@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2E6BE6" />
+  <title>错题集 · 收集每一道错题</title>
+  <meta name="description" content="错题集 App 官方网站：拍照存错题、AI 整理、间隔重复、错题组卷。" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #2E6BE6;
+      --primary-deep: #1F4FB3;
+      --secondary: #19B5A5;
+      --bg: #F7F8FA;
+      --card: #FFFFFF;
+      --text: #1A1D24;
+      --text-2: #6B7280;
+      --divider: #F2F4F7;
+    }
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+        "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
+      color: #fff;
+      padding: 56px 24px 64px;
+      text-align: center;
+    }
+    .hero .logo {
+      width: 80px; height: 80px; border-radius: 20px;
+      background: rgba(255,255,255,0.18);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 18px;
+      font-size: 42px; line-height: 1;
+    }
+    .hero h1 {
+      font-size: 28px; font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .hero .tagline {
+      margin-top: 12px;
+      font-size: 15px;
+      opacity: 0.9;
+    }
+    .cta-row {
+      margin-top: 28px;
+      display: flex; flex-direction: column; align-items: stretch; gap: 12px;
+      max-width: 320px; margin-left: auto; margin-right: auto;
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-size: 15px; font-weight: 600;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: #fff;
+      color: var(--primary);
+    }
+    .btn-primary:hover { transform: translateY(-1px); text-decoration: none; }
+    .btn-ghost {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.32);
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.18); text-decoration: none; }
+    .version-note {
+      margin-top: 14px;
+      font-size: 12px;
+      opacity: 0.78;
+    }
+
+    /* ── Container ── */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 20px;
+    }
+    h2 {
+      font-size: 20px; font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    /* ── Feature grid ── */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .feature {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px 16px;
+      border: 1px solid var(--divider);
+    }
+    .feature .icon {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      background: rgba(46, 107, 230, 0.10);
+      color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+    .feature h3 {
+      font-size: 15px; font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .feature p {
+      font-size: 13px;
+      color: var(--text-2);
+    }
+    @media (min-width: 640px) {
+      .features { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    /* ── Changelog ── */
+    .changelog {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid var(--divider);
+    }
+    .changelog .entry {
+      padding: 14px 0;
+      border-bottom: 1px dashed var(--divider);
+    }
+    .changelog .entry:last-child { border-bottom: none; padding-bottom: 0; }
+    .changelog .entry:first-child { padding-top: 0; }
+    .changelog .head {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 8px;
+    }
+    .changelog .ver {
+      background: var(--primary);
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .changelog .date {
+      font-size: 12px;
+      color: var(--text-2);
+    }
+    .changelog .log {
+      font-size: 14px;
+      color: var(--text);
+      white-space: pre-wrap;
+    }
+    .changelog .empty {
+      color: var(--text-2);
+      font-size: 14px;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 32px 20px 48px;
+      color: var(--text-2);
+      font-size: 12px;
+    }
+    footer a { color: var(--text-2); }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="logo">📒</div>
+    <h1>错题集</h1>
+    <p class="tagline">收集每一道错题，巩固每一个知识点</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" id="download-apk" href="#" download>
+        ⬇️ 下载 Android 版
+      </a>
+      <a class="btn btn-ghost" href="#changelog">查看更新日志</a>
+    </div>
+    <p class="version-note" id="version-note">加载中…</p>
+  </section>
+
+  <div class="container">
+
+    <!-- 功能特性 -->
+    <h2>核心功能</h2>
+    <div class="features">
+      <div class="feature">
+        <div class="icon">📸</div>
+        <h3>一拍即存</h3>
+        <p>拍下错题，自动裁剪，秒存错题本</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🤖</div>
+        <h3>AI 整理</h3>
+        <p>自动识别题干 / 答案 / 知识点</p>
+      </div>
+      <div class="feature">
+        <div class="icon">📒</div>
+        <h3>错题本</h3>
+        <p>按学科 / 知识点分组，随时翻看</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🔁</div>
+        <h3>间隔重复</h3>
+        <p>SM-2 算法，记住的不再打扰</p>
+      </div>
+      <div class="feature">
+        <div class="icon">📝</div>
+        <h3>错题组卷</h3>
+        <p>按知识点组卷，一键导出 PDF</p>
+      </div>
+      <div class="feature">
+        <div class="icon">✨</div>
+        <h3>笔迹擦除</h3>
+        <p>试卷擦除后再归档，干净留白</p>
+      </div>
+    </div>
+
+    <!-- 更新日志 -->
+    <h2 style="margin-top: 32px;" id="changelog">更新日志</h2>
+    <div class="changelog" id="changelog-list">
+      <div class="empty">加载中…</div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>© 错题集 · 由 CloudBase 静态托管驱动</p>
+    <p style="margin-top: 6px;">
+      <a href="#" id="footer-version">当前版本 —</a>
+    </p>
+  </footer>
+
+  <script>
+    // 从 version.json 拉取最新版本信息，自动同步下载按钮 + 更新日志。
+    (async function () {
+      try {
+        const res = await fetch('version.json', { cache: 'no-cache' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const v = await res.json();
+
+        // 下载按钮：指向清单里的 downloadUrl
+        const dl = document.getElementById('download-apk');
+        dl.href = v.downloadUrl || '#';
+        if (v.versionName) {
+          dl.textContent = '⬇️ 下载 Android 版（V' + v.versionName + '）';
+        }
+        if (v.apkSizeBytes) {
+          const mb = (v.apkSizeBytes / 1024 / 1024).toFixed(1);
+          const note = document.getElementById('version-note');
+          note.textContent = '当前最新版 V' + v.versionName + ' · 约 ' + mb + ' MB';
+        }
+        const fv = document.getElementById('footer-version');
+        if (fv && v.versionName) {
+          fv.textContent = '当前版本 V' + v.versionName;
+        }
+
+        // 更新日志
+        const list = document.getElementById('changelog-list');
+        if (v.updateLog) {
+          const date = v.publishedAt
+            ? new Date(v.publishedAt).toLocaleDateString('zh-CN')
+            : '';
+          list.innerHTML = '<div class="entry">' +
+            '<div class="head">' +
+              '<span class="ver">V' + (v.versionName || '?') + '</span>' +
+              (date ? '<span class="date">' + date + '</span>' : '') +
+            '</div>' +
+            '<div class="log">' + escapeHtml(v.updateLog) + '</div>' +
+          '</div>';
+        } else {
+          list.innerHTML = '<div class="empty">暂无更新日志</div>';
+        }
+      } catch (e) {
+        document.getElementById('changelog-list').innerHTML =
+          '<div class="empty">版本信息加载失败</div>';
+        const note = document.getElementById('version-note');
+        note.textContent = '版本信息加载失败';
+      }
+    })();
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+  </script>
+
+</body>
+</html>
