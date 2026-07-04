@@ -1,0 +1,10 @@
+{
+  "versionCode": 2,
+  "versionName": "1.1.0",
+  "downloadUrl": "https://jianilrizhi-d7gbsmtka8ca38268-1419360976.tcloudbaseapp.com/cuotiji/apk/cuotiji-1.1.0+2.apk",
+  "apkSizeBytes": 161132448,
+  "minSupportedVersionCode": 1,
+  "forceUpdate": false,
+  "updateLog": "• 拍照新增实时纸张边缘追踪（DocQuadNet 智能取景，自动对齐提示）\n• 矫正 / 去手写 / 切题全面接入百度 AI，效果更稳更清晰\n• 批改重做：原图对照联动面板、并发限流修复，减少漏判 / 误判\n• 相似题、薄弱点出题、真题试卷导入体验优化\n• 云端图片改为入库时下载存本地，避免过期后「图片不存在」\n• 新增错题打印卡片功能",
+  "publishedAt": "2026-07-04T16:00:00+08:00"
+}
