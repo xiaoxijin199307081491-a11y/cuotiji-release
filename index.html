@@ -267,19 +267,20 @@
 
   <script>
     // CloudBase 云存储的临时签名 URL 实测真实有效期只有约 20 分钟（远短于
-    // getTempFileURL 的 maxAge 参数），写死一条链接进 version.json 撑不到用户
-    // 点开网页那一刻。曾经试过让 downloadUrl 直接指向 getFileUrl 云函数的 GET
-    // 入口、由它现场签好再 302 跳转——这条路是错的：CloudBase 对未备案域名的
-    // "页面访问提示"中间页不只挂在静态托管域名，云函数 HTTP 访问服务域名
-    // （getFileUrl 所在的 *.service.tcloudbase.com）一样会拦截"浏览器整页
-    // 跳转"，跳转的第一跳只要落在这个域名上就会被拦下来，302 还没执行就已经
-    // 被拦截。而 fetch/XHR 这类程序化请求从不触发这个拦截。所以正确做法是：
-    // 点击下载按钮时用 fetch（不是整页跳转）现场调 getFileUrl 换一个刚签好的
-    // COS 直链（*.tcb.qcloud.la 域名，从未被这个中间页拦过），再用
-    // window.location.href 跳转到这个链接——网页导航的落点始终是 COS 域名，
-    // 不会经过会被拦截的 tcloudbase.com 家族域名。
-    const GET_FILE_URL_ENDPOINT =
-      'https://jianilrizhi-d7gbsmtka8ca38268.service.tcloudbase.com/getFileUrl';
+    // getTempFileURL 的 maxAge 参数）。曾经试过两种"点击时现签"的方案：
+    // (1) downloadUrl 指向 getFileUrl 云函数的 GET 入口现场 302——撞了
+    //     CloudBase 对 *.service.tcloudbase.com 域名的"页面访问提示"中间页，
+    //     跳转第一跳落在这个域名上就被拦，302 没机会执行；
+    // (2) 网页 JS 用 fetch（非导航请求，理论上不该被中间页拦）现签换链接再
+    //     跳转——真机实测这条也没跑通（点击后最终还是落到了旧的静态兜底链接），
+    //     具体原因还没能用真实浏览器复现调试确认（当时没有可用的浏览器调试
+    //     环境），不排除中间页的拦截逻辑比"只拦顶层导航"更宽泛。
+    // 两条现签路径在真机上都不可靠，与其继续猜，不如让网站这层完全不依赖
+    // 现签——直接用一条**定期在后台刷新**的静态直链（.tcb.qcloud.la 域名，
+    // 从未在任何真机截图里出现过中间页，唯一的失效模式是签名过期）。
+    // App 内更新走的是 Dart/Dio 原生 HTTP 请求（lib/core/update/
+    // update_availability.dart 的 resolveDownloadUrl），不是浏览器 fetch，
+    // 不受这个问题影响，维持现场解析不变。
 
     // 从 version.json 拉取最新版本信息，自动同步下载按钮 + 更新日志。
     (async function () {
@@ -288,34 +289,9 @@
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const v = await res.json();
 
-        // 下载按钮：先按清单里的 downloadUrl 显示（部署时现签的直链，兜底用），
-        // 真正点击时用 apkFileID 现场换一个更新鲜的链接再跳转。
+        // 下载按钮：直接用清单里的 downloadUrl（后台定期刷新的静态直链）。
         const dl = document.getElementById('download-apk');
         dl.href = v.downloadUrl || '#';
-        const apkFileID = v.apkFileID || '';
-        dl.addEventListener('click', function (e) {
-          if (!apkFileID) return; // 没有 fileID → 走 <a href> 默认跳转（静态兜底直链）
-          e.preventDefault();
-          const fallback = dl.href;
-          // Content-Type 用 text/plain 而不是 application/json——这是 CORS
-          // "简单请求" 安全列表内的类型，浏览器不会先发 OPTIONS 预检，绕开
-          // "云函数网关要不要正确代理预检响应头"这层不确定性；服务端
-          // parseBody() 本来就是无条件 JSON.parse(event.body)，不看
-          // Content-Type，这么改不影响解析。
-          fetch(GET_FILE_URL_ENDPOINT, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-            body: JSON.stringify({ fileID: apkFileID, maxAge: 3600 }),
-          })
-            .then((r) => r.json())
-            .then((data) => {
-              const url = data && data.fileList && data.fileList[0] &&
-                data.fileList[0].tempFileURL;
-              if (!url) throw new Error('empty tempFileURL');
-              window.location.href = url;
-            })
-            .catch(() => { window.location.href = fallback; });
-        });
         if (v.versionName) {
           dl.textContent = '⬇️ 下载 Android 版（V' + v.versionName + '）';
         }
