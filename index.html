@@ -266,6 +266,38 @@
   </footer>
 
   <script>
+    // CloudBase 云存储的临时签名 URL 实测真实有效期只有约 20 分钟（跟 --expires
+    // 传的 7 天完全不符——像是背后临时密钥本身的寿命更短），写死在 version.json
+    // 里的 downloadUrl 撑不到用户点开网页再点下载那一刻。改成点击时现签：
+    // 按钮先按 downloadUrl 兜底显示，真正点击时用 apkFileID 现调 getFileUrl
+    // 云函数换一个刚生成、绝对没过期的链接再跳转；这个云函数已经加了 CORS。
+    const CF_BASE_URL = 'https://jianilrizhi-d7gbsmtka8ca38268.service.tcloudbase.com';
+    let _apkFileID = '';
+
+    async function handleDownloadClick(e) {
+      if (!_apkFileID) return; // 没有 fileID（老清单兜底）→ 走 href 原生跳转
+      e.preventDefault();
+      const dl = document.getElementById('download-apk');
+      const original = dl.textContent;
+      dl.textContent = '正在获取下载链接…';
+      try {
+        const res = await fetch(CF_BASE_URL + '/getFileUrl', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileID: _apkFileID, maxAge: 3600 }),
+        });
+        const data = await res.json();
+        const url = data.fileList && data.fileList[0] && data.fileList[0].tempFileURL;
+        if (!url) throw new Error('未拿到下载链接');
+        window.location.href = url;
+      } catch (err) {
+        // 现签失败（网络问题等）→ 退回页面加载时那个链接，好歹有得试。
+        window.location.href = dl.href;
+      } finally {
+        dl.textContent = original;
+      }
+    }
+
     // 从 version.json 拉取最新版本信息，自动同步下载按钮 + 更新日志。
     (async function () {
       try {
@@ -273,9 +305,11 @@
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const v = await res.json();
 
-        // 下载按钮：指向清单里的 downloadUrl
+        // 下载按钮：指向清单里的 downloadUrl（兜底），真正下载时点击会现签一个新的
         const dl = document.getElementById('download-apk');
         dl.href = v.downloadUrl || '#';
+        _apkFileID = v.apkFileID || '';
+        dl.addEventListener('click', handleDownloadClick);
         if (v.versionName) {
           dl.textContent = '⬇️ 下载 Android 版（V' + v.versionName + '）';
         }
