@@ -1,8 +1,7 @@
 {
   "versionCode": 4,
   "versionName": "1.1.0",
-  "downloadUrl": "https://6a69-jianilrizhi-d7gbsmtka8ca38268-1419360976.tcb.qcloud.la/release/cuotiji-1.1.0+4.apk?sign=d3961b703e905b24d61609027077c72e&t=1783165238",
-  "apkFileID": "cloud://jianilrizhi-d7gbsmtka8ca38268.6a69-jianilrizhi-d7gbsmtka8ca38268-1419360976/release/cuotiji-1.1.0+4.apk",
+  "downloadUrl": "https://jianilrizhi-d7gbsmtka8ca38268.service.tcloudbase.com/getFileUrl?fileID=cloud%3A%2F%2Fjianilrizhi-d7gbsmtka8ca38268.6a69-jianilrizhi-d7gbsmtka8ca38268-1419360976%2Frelease%2Fcuotiji-1.1.0%2B4.apk&maxAge=3600",
   "apkSizeBytes": 161132448,
   "minSupportedVersionCode": 1,
   "forceUpdate": false,

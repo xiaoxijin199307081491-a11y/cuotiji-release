@@ -266,37 +266,13 @@
   </footer>
 
   <script>
-    // CloudBase 云存储的临时签名 URL 实测真实有效期只有约 20 分钟（跟 --expires
-    // 传的 7 天完全不符——像是背后临时密钥本身的寿命更短），写死在 version.json
-    // 里的 downloadUrl 撑不到用户点开网页再点下载那一刻。改成点击时现签：
-    // 按钮先按 downloadUrl 兜底显示，真正点击时用 apkFileID 现调 getFileUrl
-    // 云函数换一个刚生成、绝对没过期的链接再跳转；这个云函数已经加了 CORS。
-    const CF_BASE_URL = 'https://jianilrizhi-d7gbsmtka8ca38268.service.tcloudbase.com';
-    let _apkFileID = '';
-
-    async function handleDownloadClick(e) {
-      if (!_apkFileID) return; // 没有 fileID（老清单兜底）→ 走 href 原生跳转
-      e.preventDefault();
-      const dl = document.getElementById('download-apk');
-      const original = dl.textContent;
-      dl.textContent = '正在获取下载链接…';
-      try {
-        const res = await fetch(CF_BASE_URL + '/getFileUrl', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fileID: _apkFileID, maxAge: 3600 }),
-        });
-        const data = await res.json();
-        const url = data.fileList && data.fileList[0] && data.fileList[0].tempFileURL;
-        if (!url) throw new Error('未拿到下载链接');
-        window.location.href = url;
-      } catch (err) {
-        // 现签失败（网络问题等）→ 退回页面加载时那个链接，好歹有得试。
-        window.location.href = dl.href;
-      } finally {
-        dl.textContent = original;
-      }
-    }
+    // CloudBase 云存储的临时签名 URL 实测真实有效期只有约 20 分钟（远短于
+    // getTempFileURL 的 maxAge 参数），写死一条链接进 version.json 撑不到用户
+    // 点开网页/点 App 内"立即更新"那一刻。根治方案不在网页这层：downloadUrl
+    // 现在指向 getFileUrl 云函数的 GET 入口（带 fileID 查询参数），云函数每次
+    // 收到请求都现场签一个全新临时 URL 再 302 跳转过去——这个入口 URL 本身永远
+    // 不过期，网页 <a href> 直接跳转即可，不用再在这层做任何 JS 处理，App 内
+    // launchUrlString 打开外部浏览器一样受益（同一个 downloadUrl 字段）。
 
     // 从 version.json 拉取最新版本信息，自动同步下载按钮 + 更新日志。
     (async function () {
@@ -305,11 +281,9 @@
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const v = await res.json();
 
-        // 下载按钮：指向清单里的 downloadUrl（兜底），真正下载时点击会现签一个新的
+        // 下载按钮：指向清单里的 downloadUrl（getFileUrl 现签入口，永不过期）
         const dl = document.getElementById('download-apk');
         dl.href = v.downloadUrl || '#';
-        _apkFileID = v.apkFileID || '';
-        dl.addEventListener('click', handleDownloadClick);
         if (v.versionName) {
           dl.textContent = '⬇️ 下载 Android 版（V' + v.versionName + '）';
         }
