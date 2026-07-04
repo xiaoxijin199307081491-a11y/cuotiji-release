@@ -268,11 +268,18 @@
   <script>
     // CloudBase 云存储的临时签名 URL 实测真实有效期只有约 20 分钟（远短于
     // getTempFileURL 的 maxAge 参数），写死一条链接进 version.json 撑不到用户
-    // 点开网页/点 App 内"立即更新"那一刻。根治方案不在网页这层：downloadUrl
-    // 现在指向 getFileUrl 云函数的 GET 入口（带 fileID 查询参数），云函数每次
-    // 收到请求都现场签一个全新临时 URL 再 302 跳转过去——这个入口 URL 本身永远
-    // 不过期，网页 <a href> 直接跳转即可，不用再在这层做任何 JS 处理，App 内
-    // launchUrlString 打开外部浏览器一样受益（同一个 downloadUrl 字段）。
+    // 点开网页那一刻。曾经试过让 downloadUrl 直接指向 getFileUrl 云函数的 GET
+    // 入口、由它现场签好再 302 跳转——这条路是错的：CloudBase 对未备案域名的
+    // "页面访问提示"中间页不只挂在静态托管域名，云函数 HTTP 访问服务域名
+    // （getFileUrl 所在的 *.service.tcloudbase.com）一样会拦截"浏览器整页
+    // 跳转"，跳转的第一跳只要落在这个域名上就会被拦下来，302 还没执行就已经
+    // 被拦截。而 fetch/XHR 这类程序化请求从不触发这个拦截。所以正确做法是：
+    // 点击下载按钮时用 fetch（不是整页跳转）现场调 getFileUrl 换一个刚签好的
+    // COS 直链（*.tcb.qcloud.la 域名，从未被这个中间页拦过），再用
+    // window.location.href 跳转到这个链接——网页导航的落点始终是 COS 域名，
+    // 不会经过会被拦截的 tcloudbase.com 家族域名。
+    const GET_FILE_URL_ENDPOINT =
+      'https://jianilrizhi-d7gbsmtka8ca38268.service.tcloudbase.com/getFileUrl';
 
     // 从 version.json 拉取最新版本信息，自动同步下载按钮 + 更新日志。
     (async function () {
@@ -281,9 +288,34 @@
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const v = await res.json();
 
-        // 下载按钮：指向清单里的 downloadUrl（getFileUrl 现签入口，永不过期）
+        // 下载按钮：先按清单里的 downloadUrl 显示（部署时现签的直链，兜底用），
+        // 真正点击时用 apkFileID 现场换一个更新鲜的链接再跳转。
         const dl = document.getElementById('download-apk');
         dl.href = v.downloadUrl || '#';
+        const apkFileID = v.apkFileID || '';
+        dl.addEventListener('click', function (e) {
+          if (!apkFileID) return; // 没有 fileID → 走 <a href> 默认跳转（静态兜底直链）
+          e.preventDefault();
+          const fallback = dl.href;
+          // Content-Type 用 text/plain 而不是 application/json——这是 CORS
+          // "简单请求" 安全列表内的类型，浏览器不会先发 OPTIONS 预检，绕开
+          // "云函数网关要不要正确代理预检响应头"这层不确定性；服务端
+          // parseBody() 本来就是无条件 JSON.parse(event.body)，不看
+          // Content-Type，这么改不影响解析。
+          fetch(GET_FILE_URL_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+            body: JSON.stringify({ fileID: apkFileID, maxAge: 3600 }),
+          })
+            .then((r) => r.json())
+            .then((data) => {
+              const url = data && data.fileList && data.fileList[0] &&
+                data.fileList[0].tempFileURL;
+              if (!url) throw new Error('empty tempFileURL');
+              window.location.href = url;
+            })
+            .catch(() => { window.location.href = fallback; });
+        });
         if (v.versionName) {
           dl.textContent = '⬇️ 下载 Android 版（V' + v.versionName + '）';
         }
