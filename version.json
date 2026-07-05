@@ -1,11 +1,11 @@
 {
-  "versionCode": 6,
-  "versionName": "1.1.0",
-  "downloadUrl": "https://6a69-jianilrizhi-d7gbsmtka8ca38268-1419360976.tcb.qcloud.la/release/cuotiji-1.1.0+6.apk?sign=02204a62f4c705f404ba4a55977ee7a7&t=1783175798",
-  "apkFileID": "cloud://jianilrizhi-d7gbsmtka8ca38268.6a69-jianilrizhi-d7gbsmtka8ca38268-1419360976/release/cuotiji-1.1.0+6.apk",
-  "apkSizeBytes": 161132448,
+  "versionCode": 7,
+  "versionName": "1.1.1",
+  "downloadUrl": "https://6a69-jianilrizhi-d7gbsmtka8ca38268-1419360976.tcb.qcloud.la/release/cuotiji-1.1.1+7.apk?sign=a9e2210b6b75bec7edc994942b52444d&t=1783242708",
+  "apkFileID": "cloud://jianilrizhi-d7gbsmtka8ca38268.6a69-jianilrizhi-d7gbsmtka8ca38268-1419360976/release/cuotiji-1.1.1+7.apk",
+  "apkSizeBytes": 64464055,
   "minSupportedVersionCode": 1,
   "forceUpdate": false,
-  "updateLog": "• 修复「我的-检查更新」手动点击时不管版本号、只要清单能拉到就一直提示有新版本的问题——现在会正确识别已是最新版本\n• 修复官网/App内更新下载链接会撞到腾讯云中间页、或过期打不开的问题——改成点击时现签直连COS，不再依赖会被拦截的中转域名\n• 修复「错题卡」误印正确答案的问题——卡片不再显示正解，留白给孩子重做后自己核对\n• 修复「错题卡」知识要点一直空着的问题——批改作业时顺带提取知识点，收藏入库时不再丢失\n• 切题引擎升级为合合信息(TextIn)，密集排版试卷切分更准，价格更低（自动降级百度兜底）\n• 「错题卡片」挪到首页顶层功能区，选题后直接导出打印，不用再去错题本里找\n• 拍照新增实时纸张边缘追踪（DocQuadNet 智能取景，自动对齐提示）\n• 批改重做：原图对照联动面板、并发限流修复，减少漏判 / 误判\n• 相似题、薄弱点出题、真题试卷导入体验优化\n• 云端图片改为入库时下载存本地，避免过期后「图片不存在」",
-  "publishedAt": "2026-07-04T22:36:00+08:00"
+  "updateLog": "• 安装包瘦身：只保留 arm64（覆盖近8年的真实设备），从约155MB降到约65MB\n• 拍照实时纸张边缘追踪明显更跟手：去掉过度节流/平滑，追踪框基本1-2帧内贴上新位置\n• 练题记录新增删除功能，AI出题/相似题/去手写/组卷打印记录都能单条删除",
+  "publishedAt": "2026-07-05T17:11:58+08:00"
 }
